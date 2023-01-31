@@ -1,36 +1,29 @@
 package no.hvl.dat153.vsto.ImageDemo;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                        HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
                         /* Let's be polite: */
                         connection.setRequestProperty("User-agent", "no.hvl.dat153.vsto/0.1");
                         connection.connect();
@@ -94,6 +87,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            File httpCacheDir = new File(getCacheDir(), "http");
+            long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.i("vsto", "HTTP response cache installation failed:" + e);
+        }
+
         images.add(new ResourceImage());
         images.add(new URLImage() {
             @Override
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /* Should be a RecyclerView. */
-        final GridView grid = findViewById(R.id.grid);
+        final ListView grid = findViewById(R.id.grid);
 
         ArrayAdapter<ImageItem> a = new ArrayAdapter<ImageItem>(this, R.layout.personitem) {
             public View getView(int position, View _convertView, ViewGroup parent){
