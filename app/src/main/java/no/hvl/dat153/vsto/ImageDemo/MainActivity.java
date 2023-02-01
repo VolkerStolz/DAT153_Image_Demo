@@ -61,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
                         /* Let's be polite: */
                         connection.setRequestProperty("User-agent", "no.hvl.dat153.vsto/0.1");
                         connection.connect();
-                        /* Uncomment this line to actually see the placeholder: */
-                        // sleep(5000);
                         Bitmap bm = BitmapFactory.decodeStream(connection.getInputStream());
                         connection.disconnect();
                         if (bm == null)
                             throw new RuntimeException();
+                        /* More time to show placeholder: */
+                        sleep(5000);
                         /* But we need to return to the UI thread to update the image: */
                         boolean result = iv.post(new Runnable() {
                             @Override
