@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -51,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         void setImage(ImageView iv) {
+            /* Show a place-holder while we're fetching the image: */
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.baseline_question_mark_24));
             /* We're not allowed to access the network from the UI-thread: */
             new Thread() {
                 @Override
@@ -60,15 +61,16 @@ public class MainActivity extends AppCompatActivity {
                         /* Let's be polite: */
                         connection.setRequestProperty("User-agent", "no.hvl.dat153.vsto/0.1");
                         connection.connect();
+                        /* Uncomment this line to actually see the placeholder: */
+                        // sleep(5000);
                         Bitmap bm = BitmapFactory.decodeStream(connection.getInputStream());
+                        connection.disconnect();
                         if (bm == null)
                             throw new RuntimeException();
                         /* But we need to return to the UI thread to update the image: */
                         boolean result = iv.post(new Runnable() {
                             @Override
-                            public void run() {
-                                iv.setImageBitmap(bm);
-                            }
+                            public void run() { iv.setImageBitmap(bm); }
                         });
                         if (!result) throw new RuntimeException();
                     } catch (Exception e) {
